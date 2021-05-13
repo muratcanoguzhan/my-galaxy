@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: AnimatedContainerDemo(),
     );
   }
 }
@@ -26,7 +28,7 @@ class TimeMachine extends StatefulWidget {
 
 class _TimeMachine extends State<TimeMachine>
     with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  late AnimationController _animationController;
 
   @override
   void initState() {
@@ -69,7 +71,7 @@ class GalaxyFitz extends StatelessWidget {
 class TimeStopper extends StatelessWidget {
   final AnimationController controller;
 
-  const TimeStopper({Key key, this.controller}) : super(key: key);
+  const TimeStopper({Key? key, required this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   final Image galaxy = Image.asset('galaxy_transparent.png');
   final Image ufo = Image.asset('ufo.png');
-  AnimationController _animation;
+  late AnimationController _animation;
 
   @override
   void initState() {
@@ -129,15 +131,15 @@ class _MyHomePageState extends State<MyHomePage>
 //AnimatedWidget and AnimationBuilder is the same
 class BeamTransation extends AnimatedWidget {
   const BeamTransation(
-      {Key key, @required AnimationController animation, Widget child})
+      {Key? key, required AnimationController animation, Widget? child})
       : _child = child,
         super(key: key, listenable: animation);
 
-  final Widget _child;
+  final Widget? _child;
 
   @override
   Widget build(BuildContext context) {
-    Animation<double> animation = listenable;
+    Animation<double> animation = listenable as Animation<double>;
     return ClipPath(
         clipper: const BeamClipper(),
         child: Container(
@@ -168,4 +170,112 @@ class BeamClipper extends CustomClipper<Path> {
   /// Return false always because we always clip the same area.
   @override
   bool shouldReclip(CustomClipper oldClipper) => false;
+}
+
+const owl_url =
+    'https://raw.githubusercontent.com/flutter/website/master/src/images/owl.jpg';
+
+class FadeInDemo extends StatefulWidget {
+  _FadeInDemoState createState() => _FadeInDemoState();
+}
+
+class _FadeInDemoState extends State<FadeInDemo> {
+  double opacity = 0.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: <Widget>[
+      Image.network(owl_url),
+      TextButton(
+        child: Text(
+          'Show details',
+          style: TextStyle(color: Colors.blueAccent),
+        ),
+        onPressed: () => setState(() {
+          opacity = opacity == 1 ? 0 : 1;
+        }),
+      ),
+      AnimatedOpacity(
+        duration: Duration(seconds: 2),
+        curve: Curves.easeInCubic,
+        opacity: opacity,
+        child: Column(
+          children: <Widget>[
+            Text('Type: Owl'),
+            Text('Age: 39'),
+            Text('Employment: None'),
+          ],
+        ),
+      )
+    ]);
+  }
+}
+
+double randomBorderRadius() {
+  return Random().nextDouble() * 64;
+}
+
+double randomMargin() {
+  return Random().nextDouble() * 64;
+}
+
+Color randomColor() {
+  return Color(0xFFFFFFFF & Random().nextInt(0xFFFFFFFF));
+}
+
+class AnimatedContainerDemo extends StatefulWidget {
+  _AnimatedContainerDemoState createState() => _AnimatedContainerDemoState();
+}
+
+const _duration = Duration(milliseconds: 400);
+
+class _AnimatedContainerDemoState extends State<AnimatedContainerDemo> {
+  late Color color;
+  late double borderRadius;
+  late double margin;
+
+  @override
+  initState() {
+    super.initState();
+    color = randomColor();
+    borderRadius = randomBorderRadius();
+    margin = randomMargin();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              width: 128,
+              height: 128,
+              child: AnimatedContainer(
+                duration: _duration,
+                curve: Curves.easeInOutBack,
+                margin: EdgeInsets.all(margin),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(borderRadius),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              child: Text('change'),
+              onPressed: () => change(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void change() {
+    setState(() {
+      color = randomColor();
+      borderRadius = randomBorderRadius();
+      margin = randomMargin();
+    });
+  }
 }
