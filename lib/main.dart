@@ -115,24 +115,7 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     return Stack(
       alignment: AlignmentDirectional.center,
-      children: <Widget>[
-        galaxy,
-        AnimatedBuilder(
-            animation: _animation,
-            builder: (_, __) {
-              return ClipPath(
-                  clipper: const BeamClipper(),
-                  child: Container(
-                    height: 1000,
-                    decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                            radius: 1.5,
-                            colors: [Colors.yellow, Colors.transparent],
-                            stops: [0, _animation.value])),
-                  ));
-            }),
-        ufo
-      ],
+      children: <Widget>[galaxy, BeamTransation(animation: _animation), ufo],
     );
   }
 
@@ -140,6 +123,32 @@ class _MyHomePageState extends State<MyHomePage>
   void dispose() {
     _animation.dispose();
     super.dispose();
+  }
+}
+
+//AnimatedWidget and AnimationBuilder is the same
+class BeamTransation extends AnimatedWidget {
+  const BeamTransation(
+      {Key key, @required AnimationController animation, Widget child})
+      : _child = child,
+        super(key: key, listenable: animation);
+
+  final Widget _child;
+
+  @override
+  Widget build(BuildContext context) {
+    Animation<double> animation = listenable;
+    return ClipPath(
+        clipper: const BeamClipper(),
+        child: Container(
+          height: 1000,
+          decoration: BoxDecoration(
+              gradient: RadialGradient(
+                  radius: 1.5,
+                  colors: [Colors.yellow, Colors.transparent],
+                  stops: [0, animation.value])),
+        ));
+    ;
   }
 }
 
