@@ -139,6 +139,7 @@ class BeamTransation extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    //look at aniamtion.value here
     Animation<double> animation = listenable as Animation<double>;
     return ClipPath(
         clipper: const BeamClipper(),
@@ -294,24 +295,20 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
         AnimationController(duration: Duration(seconds: 2), vsync: this);
 
     animation = Tween<double>(begin: 0, end: 300).animate(controller)
-      ..addListener(() {
-        setState(() {});
-      });
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          controller.forward();
+        }
+      })
+      ..addStatusListener((state) => print('$state'));
 
     controller.forward();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 10),
-        height: animation.value,
-        width: animation.value,
-        child: FlutterLogo(),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AnimatedLogo(animation: animation);
 
   @override
   void dispose() {
