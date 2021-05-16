@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LogoAppForAnimatedBuilder(),
+      home: MultipleAnimatedLogoAppApp(),
     );
   }
 }
@@ -139,7 +139,6 @@ class BeamTransation extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    //look at aniamtion.value here
     Animation<double> animation = listenable as Animation<double>;
     return ClipPath(
         clipper: const BeamClipper(),
@@ -400,4 +399,68 @@ class GrowTransition extends StatelessWidget {
                 ),
             child: child),
       );
+}
+
+class MultipleAnimatedLogo extends AnimatedWidget {
+  static final _opacityTween = Tween<double>(begin: 0.1, end: 1);
+  static final _sizeTween = Tween<double>(begin: 0, end: 300);
+
+  MultipleAnimatedLogo({Key? key, required Animation<double> animation})
+      : super(key: key, listenable: animation);
+
+  @override
+  Widget build(BuildContext context) {
+    final animation = listenable as Animation<double>;
+    return Center(
+      child: Opacity(
+        opacity: _opacityTween.evaluate(animation),
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          height: _sizeTween.evaluate(animation),
+          width: _sizeTween.evaluate(animation),
+          child: FlutterLogo(),
+        ),
+      ),
+    );
+  }
+}
+
+class MultipleAnimatedLogoAppApp extends StatefulWidget {
+  @override
+  _MultipleAnimatedLogoAppAppState createState() =>
+      _MultipleAnimatedLogoAppAppState();
+}
+
+class _MultipleAnimatedLogoAppAppState extends State<MultipleAnimatedLogoAppApp>
+    with SingleTickerProviderStateMixin {
+  late Animation<double> animation;
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller =
+        AnimationController(duration: const Duration(seconds: 2), vsync: this);
+
+    animation = CurvedAnimation(parent: controller, curve: Curves.easeIn)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          controller.forward();
+        }
+      });
+
+    controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      MultipleAnimatedLogo(animation: animation);
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 }
